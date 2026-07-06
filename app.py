@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify, Response, send_file
+from flask import after_this_request
 import yt_dlp
 import os
 import uuid
@@ -7,6 +8,7 @@ import time
 import threading
 import subprocess
 import traceback
+import shutil
 
 app = Flask(__name__)
 DOWNLOAD_FOLDER = 'downloads'
@@ -15,7 +17,12 @@ if not os.path.exists(DOWNLOAD_FOLDER):
 
 COOKIE_FILE = "/etc/secrets/cookies.txt"
 
-if not os.path.exists(COOKIE_FILE):
+SECRET_COOKIE = "/etc/secrets/cookies.txt"
+COOKIE_FILE = "/tmp/cookies.txt"
+
+if os.path.exists(SECRET_COOKIE):
+    shutil.copy2(SECRET_COOKIE, COOKIE_FILE)
+else:
     COOKIE_FILE = None
 
 progress_store = {}
@@ -79,6 +86,9 @@ def get_info():
                 'quiet': True,
                 'no_warnings': True,
                 'ignoreerrors': True,
+                'noplaylist': True,
+                'geo_bypass': True,
+                'nocheckcertificate': True,
                 **opts
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -115,11 +125,14 @@ def get_info():
             continue
     
     # All strategies failed
-    if not os.path.exists('cookies.txt'):
-        return jsonify({'error': 'Invalid URL or unsupported site. Please add cookies.txt (see docs).'}), 400
-    else:
-        return jsonify({'error': 'Invalid URL or unsupported site. Your cookies may be expired. Please refresh cookies.txt.'}), 400
+    if COOKIE_FILE:
+        return jsonify({
+            "error": "Unable to access this video. Cookies may have expired."
+        }), 400
 
+    return jsonify({
+        "error": "Unable to access this video."
+    }), 400
 # ========== Start Download ==========
 @app.route('/download', methods=['POST'])
 def download():
@@ -138,6 +151,9 @@ def download():
         'quiet': False,
         'no_warnings': False,
         'ignoreerrors': True,
+        'noplaylist': True,
+        'geo_bypass': True,
+        'nocheckcertificate': True,
         'extractor_args': {
             'youtube': {
                 'skip': ['hls', 'dash'],
@@ -248,26 +264,31 @@ def progress(download_id):
 
 # ========== Download File ==========
 @app.route('/download_file/<download_id>')
+@app.route('/download_file/<download_id>')
 def download_file(download_id):
     actual_file = None
+
     for f in os.listdir(DOWNLOAD_FOLDER):
         if f.startswith(download_id):
             actual_file = os.path.join(DOWNLOAD_FOLDER, f)
             break
-    if not actual_file or not os.path.exists(actual_file):
-        return "File not found", 404
-    
-    filename = progress_store.get(download_id, {}).get('filename', 'video.mp4')
-    
-    def cleanup():
+
+    if not actual_file:
+        return "File not found",404
+
+    @after_this_request
+    def remove_file(response):
         try:
             os.remove(actual_file)
-            if download_id in progress_store:
-                del progress_store[download_id]
+            progress_store.pop(download_id,None)
         except:
             pass
-    
-    return send_file(actual_file, as_attachment=True, download_name=filename, after_this_request=cleanup)
+        return response
 
+    return send_file(
+        actual_file,
+        as_attachment=True,
+        download_name=os.path.basename(actual_file)
+    )
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
