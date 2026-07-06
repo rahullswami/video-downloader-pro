@@ -31,29 +31,49 @@ if not FFMPEG_AVAILABLE:
 def index():
     return render_template('index.html')
 
-# ========== Get Video Info (with Cookies & Fallback) ==========
+# ========== Get Video Info (Multiple Strategies) ==========
 @app.route('/info', methods=['POST'])
 def get_info():
     url = request.form.get('url')
     if not url:
         return jsonify({'error': 'URL required'}), 400
     
-    # Try multiple approaches to fetch info
+    # Try multiple strategies
     strategies = [
-        {'extractor_args': {'youtube': {'player_client': ['android', 'web']}}},
-        {'extractor_args': {'youtube': {'player_client': ['android']}}},
-        {'extractor_args': {'youtube': {'player_client': ['web']}}},
-        {}  # bare minimum
+        # Strategy 1: Android + Web clients (best for YouTube)
+        {
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+        },
+        # Strategy 2: Only Android
+        {
+            'extractor_args': {'youtube': {'player_client': ['android']}},
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+        },
+        # Strategy 3: Only Web
+        {
+            'extractor_args': {'youtube': {'player_client': ['web']}},
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+        },
+        # Strategy 4: No extractor_args (bare)
+        {
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+        },
+        # Strategy 5: Without cookies (if cookies exist but fail)
+        {
+            'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        },
+        # Strategy 6: Completely bare
+        {}
     ]
     
-    for i, extra_args in enumerate(strategies):
+    for i, opts in enumerate(strategies):
         try:
             ydl_opts = {
                 'quiet': True,
                 'no_warnings': True,
                 'ignoreerrors': True,
-                'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
-                **extra_args
+                **opts
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
@@ -87,7 +107,11 @@ def get_info():
             print(f"Strategy {i+1} failed: {e}")
             continue
     
-    return jsonify({'error': 'Invalid URL or unsupported site. Try again with cookies.txt'}), 400
+    # All strategies failed
+    if not os.path.exists('cookies.txt'):
+        return jsonify({'error': 'Invalid URL or unsupported site. Please add cookies.txt (see docs).'}), 400
+    else:
+        return jsonify({'error': 'Invalid URL or unsupported site. Your cookies may be expired. Please refresh cookies.txt.'}), 400
 
 # ========== Start Download ==========
 @app.route('/download', methods=['POST'])
@@ -102,12 +126,11 @@ def download():
     download_id = str(uuid.uuid4())
     temp_path = os.path.join(DOWNLOAD_FOLDER, download_id)
     
-    # Common options for all downloads
+    # Common options for all downloads (try without cookies first)
     common_opts = {
         'quiet': False,
         'no_warnings': False,
         'ignoreerrors': True,
-        'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
         'extractor_args': {
             'youtube': {
                 'skip': ['hls', 'dash'],
@@ -116,6 +139,10 @@ def download():
         },
         'progress_hooks': [lambda d: progress_hook(d, download_id)],
     }
+    
+    # Add cookies if available
+    if os.path.exists('cookies.txt'):
+        common_opts['cookiefile'] = 'cookies.txt'
     
     if output_format == 'mp3':
         if format_id != 'best':
