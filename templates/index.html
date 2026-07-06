@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Downloader Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body>
+
+    <!-- ========== HERO SECTION ========== -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="badge">🔥 Premium Downloader</span>
+            <h1>Download Any Video<br />in One Click</h1>
+            <p>From YouTube, Instagram, Facebook, Twitter, TikTok, and 1000+ other sites<br />in the highest quality.</p>
+            <div class="hero-stats">
+                <span><i class="fas fa-download"></i> 2M+ Downloads</span>
+                <span><i class="fas fa-globe"></i> 150+ Countries</span>
+                <span><i class="fas fa-star"></i> 4.9 Rating</span>
+            </div>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+                <path d="M0,0 C360,100 720,0 1080,80 C1260,120 1380,60 1440,40 L1440,120 L0,120 Z" fill="currentColor" opacity="0.1"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- ========== MAIN DOWNLOAD CARD ========== -->
+    <section class="main-section">
+        <div class="container">
+            <div class="card glass">
+                <!-- Theme toggle -->
+                <div class="theme-toggle">
+                    <button id="themeToggle" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+
+                <h2><i class="fas fa-download"></i> Video Downloader</h2>
+                <p class="subtitle">Paste a link and download — totally free</p>
+
+                <!-- Form -->
+                <form id="downloadForm">
+                    <div class="input-group">
+                        <input type="url" id="urlInput" placeholder="Paste video link here..." required />
+                        <button type="submit" id="downloadBtn">
+                            <span id="btnText"><i class="fas fa-arrow-down"></i> Download</span>
+                            <span id="spinner" class="hidden"><i class="fas fa-spinner fa-spin"></i></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Format & Quality Options -->
+                <div id="optionsPanel" class="options-panel hidden">
+                    <div class="option-group">
+                        <label><i class="fas fa-file-audio"></i> Format</label>
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" data-format="mp4">MP4</button>
+                            <button class="toggle-btn" data-format="mp3">MP3</button>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label><i class="fas fa-sliders-h"></i> Quality</label>
+                        <select id="qualitySelect">
+                            <option value="best">Best</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div id="videoPreview" class="preview hidden">
+                    <div class="preview-thumbnail">
+                        <img id="thumbnail" src="" alt="Thumbnail" />
+                        <span id="durationBadge" class="duration-badge"></span>
+                    </div>
+                    <div class="video-info">
+                        <h3 id="videoTitle"></h3>
+                        <p id="videoChannel"><i class="fas fa-user"></i> </p>
+                        <p id="videoViews"><i class="fas fa-eye"></i> </p>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div id="progressContainer" class="progress-container hidden">
+                    <div class="progress-stats">
+                        <span id="progressPercent">0%</span>
+                        <span id="progressSpeed"><i class="fas fa-tachometer-alt"></i> --</span>
+                        <span id="progressETA"><i class="fas fa-clock"></i> --</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progressBar" class="progress-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Status Message -->
+                <div id="status" class="status-message"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FEATURE CARDS ========== -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">💎 Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card glass">
+                    <i class="fas fa-rocket"></i>
+                    <h3>Fast Download</h3>
+                    <p>Start downloading instantly with high-speed servers.</p>
+                </div>
+                <div class="feature-card glass">
+                    <i class="fas fa-list-ul"></i>
+                    <h3>All Platforms</h3>
+                    <p>Download video and audio from 1000+ websites.</p>
+                </div>
+                <div class="feature-card glass">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    <h3>HD & 4K Quality</h3>
+                    <p>Choose your preferred resolution — from 144p to 4K.</p>
+                </div>
+                <div class="feature-card glass">
+                    <i class="fas fa-headphones"></i>
+                    <h3>MP3 Converter</h3>
+                    <p>Extract audio from videos and save as MP3.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FAQ ========== -->
+    <section class="faq">
+        <div class="container">
+            <h2 class="section-title">❓ Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item glass">
+                    <button class="faq-question">
+                        <span>Is it free?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, it's completely free. No hidden fees, no credit card required.</p>
+                    </div>
+                </div>
+                <div class="faq-item glass">
+                    <button class="faq-question">
+                        <span>Which websites are supported?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>YouTube, Instagram, Facebook, Twitter, TikTok, Vimeo, Dailymotion, and 1000+ others.</p>
+                    </div>
+                </div>
+                <div class="faq-item glass">
+                    <button class="faq-question">
+                        <span>Can I download 4K videos?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, if the video is available in 4K, you can download it.</p>
+                    </div>
+                </div>
+                <div class="faq-item glass">
+                    <button class="faq-question">
+                        <span>Is this legal?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>This tool is for personal and educational use only. Downloading copyrighted content may be subject to your country's laws.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Video Downloader Pro | Made with ❤️</p>
+            <div class="footer-links">
+                <a href="https://github.com/rahullswami"><i class="fab fa-github"></i></a>
+                <a href="https://instagram.com/rahullswami_"><i class="fab fa-instagram"></i></a>
+                <a href="https://linkedin.com/in/rahullswami"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
