@@ -6,6 +6,7 @@ import json
 import time
 import threading
 import subprocess
+import traceback
 
 app = Flask(__name__)
 DOWNLOAD_FOLDER = 'downloads'
@@ -104,7 +105,8 @@ def get_info():
                     }
                     return jsonify(result)
         except Exception as e:
-            print(f"Strategy {i+1} failed: {e}")
+            print(f"\n===== Strategy {i+1} Failed =====")
+            traceback.print_exc()
             continue
     
     # All strategies failed
