@@ -15,15 +15,12 @@ DOWNLOAD_FOLDER = 'downloads'
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
-COOKIE_FILE = "/etc/secrets/cookies.txt"
-
 SECRET_COOKIE = "/etc/secrets/cookies.txt"
-COOKIE_FILE = "/tmp/cookies.txt"
+COOKIE_FILE = None
 
 if os.path.exists(SECRET_COOKIE):
+    COOKIE_FILE = "/tmp/cookies.txt"
     shutil.copy2(SECRET_COOKIE, COOKIE_FILE)
-else:
-    COOKIE_FILE = None
 
 progress_store = {}
 
