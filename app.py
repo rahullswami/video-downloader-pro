@@ -13,6 +13,11 @@ DOWNLOAD_FOLDER = 'downloads'
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
+COOKIE_FILE = "/etc/secrets/cookies.txt"
+
+if not os.path.exists(COOKIE_FILE):
+    COOKIE_FILE = None
+
 progress_store = {}
 
 # ========== ffmpeg Check ==========
@@ -44,21 +49,21 @@ def get_info():
         # Strategy 1: Android + Web clients (best for YouTube)
         {
             'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+            'cookiefile': COOKIE_FILE
         },
         # Strategy 2: Only Android
         {
             'extractor_args': {'youtube': {'player_client': ['android']}},
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+            'cookiefile': COOKIE_FILE
         },
         # Strategy 3: Only Web
         {
             'extractor_args': {'youtube': {'player_client': ['web']}},
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+            'cookiefile': COOKIE_FILE
         },
         # Strategy 4: No extractor_args (bare)
         {
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
+            'cookiefile': COOKIE_FILE
         },
         # Strategy 5: Without cookies (if cookies exist but fail)
         {
@@ -143,8 +148,8 @@ def download():
     }
     
     # Add cookies if available
-    if os.path.exists('cookies.txt'):
-        common_opts['cookiefile'] = 'cookies.txt'
+    if COOKIE_FILE:
+        common_opts['cookiefile'] = COOKIE_FILE
     
     if output_format == 'mp3':
         if format_id != 'best':
